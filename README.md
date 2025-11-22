@@ -102,7 +102,7 @@ All state is persisted as `data/<session_id>.json`.
 
 ---
 <p align="center">
-<img src="https://github.com/niart/agent-todo-executor/blob/7b50e9f672d357ad421621fc0fac22238a1a10af/web.png" width=50% height=50%>
+<img src="https://github.com/niart/agent-todo-executor/blob/7b50e9f672d357ad421621fc0fac22238a1a10af/web.png" width=70% height=70%>
 </p>
 
 ## 3. How the Loop Works

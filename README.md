@@ -69,7 +69,7 @@ You can also provide arguments:
 python run_agent.py   --mode auto   --goal "Create a minimal coupon marketplace web app with CRUD coupon listings."
 ```
 <p align="center">
-<img src="https://github.com/niart/agent-todo-executor/blob/7b50e9f672d357ad421621fc0fac22238a1a10af/cli.png" width=50% height=50%>
+<img src="https://github.com/niart/agent-todo-executor/blob/7b50e9f672d357ad421621fc0fac22238a1a10af/cli.png" width=70% height=70%>
 </p>
 
 ### 2.2 Web UI Version (Browser)

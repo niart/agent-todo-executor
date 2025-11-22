@@ -68,6 +68,9 @@ You can also provide arguments:
 ```bash
 python run_agent.py   --mode auto   --goal "Create a minimal coupon marketplace web app with CRUD coupon listings."
 ```
+<p align="center">
+<img src="https://github.com/niart/agent-todo-executor/blob/610680675659cc55b63ab27ea413f83408f9a35f/cli.png" width=70% height=70%>
+</p>
 
 ### 2.2 Web UI Version (Browser)
 
@@ -98,6 +101,10 @@ In the UI you can:
 All state is persisted as `data/<session_id>.json`.
 
 ---
+
+<p align="center">
+<img src="https://github.com/niart/agent-todo-executor/blob/610680675659cc55b63ab27ea413f83408f9a35f/web.png" width=50% height=50%>
+</p>
 
 ## 3. How the Loop Works
 

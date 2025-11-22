@@ -12,8 +12,8 @@ This project is a small agentic prototype that:
 ## 1. Setup
 
 ```bash
-git clone <your-repo-url>
-cd <your-repo>
+git clone https://github.com/niart/agent-todo-executor.git
+cd agent-todo-executor-main
 
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
@@ -21,11 +21,11 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Configure your API key as an environment variable:
+Configure the API key as an environment variable:
 
 ```bash
-export OPENAI_API_KEY="YOUR_API_KEY"   # Linux/macOS
-# PowerShell: $env:OPENAI_API_KEY="YOUR_API_KEY"
+export OPENAI_API_KEY="the key"   # Linux/macOS
+# PowerShell: $env:OPENAI_API_KEY="the key"
 ```
 
 Optional model override (otherwise a default is used):
@@ -44,7 +44,7 @@ mkdir -p data static
 
 ## 2. How to Run
 
-### 2.1 CLI Version (Terminal)
+### 2.1 Simple CLI Version (ffrom Terminal)
 
 ```bash
 python run_agent.py
@@ -168,6 +168,10 @@ Persistence is handled in `todo_agent/storage.py`:
 
 ## 4. How I’d Extend This Prototype with More Time
 
+Currently, this prototype demonstrates the end-to-end pattern:
+
+> **Goal → Chat-based planning → Structured TODOs → Agentic execution loop → Persistent trace and state.**
+
 If this were developed further, I’d focus on:
 
 1. **Richer Task Graph & Scheduling**
@@ -203,6 +207,3 @@ If this were developed further, I’d focus on:
    - Add simple “policies” around what the agent is allowed to do.
    - Validate model outputs more strictly before applying them (e.g., JSON schemas, allowed status values).
 
-Even in its current state, this prototype cleanly demonstrates the end-to-end pattern:
-
-> **Goal → Chat-based planning → Structured TODOs → Agentic execution loop → Persistent trace and state.**

@@ -1,1 +1,1 @@
-# Empty on purpose – just marks this as a package.
+# Empty on purpose – this file indicates that the directory is a Python package.

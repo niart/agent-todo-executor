@@ -8,7 +8,6 @@ load_dotenv()
 @dataclass
 class Settings:
     """
-    Simple configuration holder.
 
     API key is read from OPENAI_API_KEY env var.
     Model can be overridden at runtime.

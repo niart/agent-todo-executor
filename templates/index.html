@@ -1,0 +1,410 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent-Driven TODO Executor</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f7;
+      color: #222;
+    }
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 16px 24px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+    section {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    h2 {
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    textarea, input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #111827;
+      color: #f9fafb;
+    }
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    button + button {
+      margin-left: 4px;
+    }
+    #sessions-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      max-height: 260px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    #sessions-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      padding: 4px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    #sessions-list li:last-child {
+      border-bottom: none;
+    }
+    #sessions-list li button {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+    #sessions-list li span {
+      font-size: 11px;
+      color: #6b7280;
+      margin-left: 6px;
+    }
+    #session-meta {
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    #tasks-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    #tasks-table th,
+    #tasks-table td {
+      border: 1px solid #e5e7eb;
+      padding: 4px 6px;
+      vertical-align: top;
+    }
+    #tasks-table th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+    .status-pending {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+    .status-done {
+      background: #ecfdf3;
+      color: #166534;
+    }
+    .status-failed {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .status-needs-follow-up {
+      background: #fffbeb;
+      color: #92400e;
+    }
+    #logs {
+      background: #0b1120;
+      color: #e5e7eb;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      padding: 8px;
+      border-radius: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .toolbar {
+      margin-bottom: 6px;
+    }
+    .toolbar button {
+      margin-bottom: 4px;
+    }
+    .small {
+      font-size: 11px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Agent-Driven TODO Executor</h1>
+  <p>Plan tasks with an LLM, execute them step-by-step, and persist sessions.</p>
+</header>
+
+<main>
+  <!-- Left column: create & list sessions -->
+  <div>
+    <section>
+      <h2>New Session</h2>
+      <form id="create-form">
+        <label for="goal">High-level goal</label>
+        <textarea id="goal" rows="4" placeholder="Describe what you want to build or achieve..."></textarea>
+
+        <label for="mode">Mode</label>
+        <select id="mode">
+          <option value="confirm">confirm (review TODO list)</option>
+          <option value="auto">auto (just use the list as-is)</option>
+        </select>
+
+        <label for="model">Model override (optional)</label>
+        <input id="model" type="text" placeholder="e.g. gpt-4o-mini">
+
+        <button type="submit">Create session</button>
+      </form>
+      <p class="small" id="create-status"></p>
+    </section>
+
+    <section style="margin-top: 12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>Existing Sessions</h2>
+        <button class="secondary" type="button" onclick="loadSessions()">Refresh</button>
+      </div>
+      <ul id="sessions-list"></ul>
+    </section>
+  </div>
+
+  <!-- Right column: session details -->
+  <div>
+    <section id="session-view" style="display:none;">
+      <h2>Session Details</h2>
+      <div id="session-meta"></div>
+
+      <div class="toolbar">
+        <button type="button" onclick="executeStep()">Execute one step</button>
+        <button type="button" onclick="executeAll()">Execute all</button>
+        <button type="button" class="secondary" onclick="refreshSession()">Refresh</button>
+        <span class="small" id="pending-indicator"></span>
+      </div>
+
+      <h3>Tasks</h3>
+      <table id="tasks-table">
+        <tr><td>No tasks yet.</td></tr>
+      </table>
+
+      <h3>Logs</h3>
+      <div id="logs">(no logs yet)</div>
+    </section>
+  </div>
+</main>
+
+<script>
+  let currentSessionId = null;
+
+  function statusPill(status) {
+    const cls = {
+      "pending": "status-pending",
+      "done": "status-done",
+      "failed": "status-failed",
+      "needs-follow-up": "status-needs-follow-up"
+    }[status] || "status-pending";
+    return `<span class="status-pill ${cls}">${status}</span>`;
+  }
+
+  async function loadSessions() {
+    const listEl = document.getElementById('sessions-list');
+    listEl.innerHTML = 'Loading...';
+    try {
+      const res = await fetch('/api/sessions');
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        listEl.innerHTML = '<li><span class="small">No sessions yet.</span></li>';
+        return;
+      }
+      listEl.innerHTML = '';
+      data.forEach(s => {
+        const li = document.createElement('li');
+
+        const btn = document.createElement('button');
+        const goalSnippet = (s.goal || '').slice(0, 50) || '(no goal)';
+        btn.textContent = goalSnippet;
+        btn.onclick = () => openSession(s.session_id);
+
+        const meta = document.createElement('span');
+        meta.textContent = `mode=${s.mode || '?'} • ${s.num_tasks ?? 0} tasks • created ${s.created_at || ''}`;
+
+        li.appendChild(btn);
+        li.appendChild(meta);
+        listEl.appendChild(li);
+      });
+    } catch (e) {
+      listEl.innerHTML = `<li><span class="small">Error loading sessions: ${e}</span></li>`;
+    }
+  }
+
+  async function openSession(id) {
+    currentSessionId = id;
+    const res = await fetch(`/api/sessions/${id}`);
+    if (!res.ok) {
+      alert('Failed to load session');
+      return;
+    }
+    const data = await res.json();
+    renderSession(data);
+  }
+
+  function renderSession(data) {
+    const sessionView = document.getElementById('session-view');
+    sessionView.style.display = 'block';
+
+    const state = data.state;
+    const metaEl = document.getElementById('session-meta');
+    metaEl.textContent = `ID: ${data.session_id} | mode: ${state.mode} | goal: ${state.goal}`;
+
+    const pendingIndicator = document.getElementById('pending-indicator');
+    pendingIndicator.textContent = data.has_pending ? 'Pending tasks remain.' : 'All tasks are in a terminal state.';
+
+    const tasksTable = document.getElementById('tasks-table');
+    if (!state.tasks || state.tasks.length === 0) {
+      tasksTable.innerHTML = '<tr><td>No tasks yet.</td></tr>';
+    } else {
+      let rows = `
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Reflection</th>
+        </tr>
+      `;
+      state.tasks.forEach(t => {
+        const reflection = (t.reflection || '').substring(0, 120);
+        rows += `
+          <tr>
+            <td>${t.id}</td>
+            <td>${t.title}</td>
+            <td>${t.description}</td>
+            <td>${statusPill(t.status)}</td>
+            <td>${reflection}</td>
+          </tr>
+        `;
+      });
+      tasksTable.innerHTML = rows;
+    }
+
+    const logsEl = document.getElementById('logs');
+    if (!state.logs || state.logs.length === 0) {
+      logsEl.textContent = '(no logs yet)';
+    } else {
+      logsEl.textContent = state.logs.join('\n');
+    }
+  }
+
+  async function executeStep() {
+    if (!currentSessionId) return;
+    const res = await fetch(`/api/sessions/${currentSessionId}/execute-step`, {
+      method: 'POST'
+    });
+    if (!res.ok) {
+      alert('Execution error');
+      return;
+    }
+    const data = await res.json();
+    renderSession(data);
+  }
+
+  async function executeAll() {
+    if (!currentSessionId) return;
+    const res = await fetch(`/api/sessions/${currentSessionId}/execute-all`, {
+      method: 'POST'
+    });
+    if (!res.ok) {
+      alert('Execution error');
+      return;
+    }
+    const data = await res.json();
+    renderSession(data);
+  }
+
+  async function refreshSession() {
+    if (!currentSessionId) return;
+    const res = await fetch(`/api/sessions/${currentSessionId}`);
+    if (!res.ok) {
+      alert('Failed to refresh session');
+      return;
+    }
+    const data = await res.json();
+    renderSession(data);
+  }
+
+  document.getElementById('create-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const goal = document.getElementById('goal').value.trim();
+    const mode = document.getElementById('mode').value;
+    const model = document.getElementById('model').value.trim();
+    const statusEl = document.getElementById('create-status');
+
+    if (!goal) {
+      statusEl.textContent = 'Goal cannot be empty.';
+      return;
+    }
+
+    statusEl.textContent = 'Creating session...';
+    try {
+      const payload = { goal, mode };
+      if (model) payload.model = model;
+
+      const res = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        statusEl.textContent = 'Error creating session.';
+        return;
+      }
+      const data = await res.json();
+      statusEl.textContent = 'Session created.';
+      await loadSessions();
+      openSession(data.session_id);
+    } catch (e) {
+      statusEl.textContent = 'Error creating session: ' + e;
+    }
+  });
+
+  // Initial load
+  loadSessions();
+</script>
+</body>
+</html>

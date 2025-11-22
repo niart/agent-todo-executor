@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+.venv/
+venv/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Local environment / secrets
+.env
+.env.*
+*.env
+
+# OpenAI keys / config (if you ever write them to files)
+openai_key.txt
+
+# App data
+data/
+session-*.json
+
+# OS junk
+.DS_Store
+Thumbs.db
